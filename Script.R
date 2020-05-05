@@ -45,12 +45,20 @@ NickMoviesDetails <- lapply(movies_ids, get_video_details)
 
 #Pull Id and Title from details
 
-FBDetailsDF <- data.frame(Id=NA, Title=NA)
+FBDetailsDF <- data.frame(id=NA, Title=NA)
 
 for (p in 1:length(NickFBDetails)) {
-  Id <- NickFBDetails[[p]]$items[[1]]$id
+  id <- NickFBDetails[[p]]$items[[1]]$id
   Title <- NickFBDetails[[p]]$items[[1]]$snippet$title
   
-  FBdetail <- data_frame(Id = Id, Title = Title)
+  FBdetail <- data_frame(id = id, Title = Title)
   FBDetailsDF <- rbind(FBdetail, FBDetailsDF)
 }
+
+#Merge details to stats data frame
+
+
+NickMusicAllData <- merge(NickMusicStats,MusicDetailsDF,by = "id")
+NickGamingAllData <- merge(NickGamingStats,GamingDetailsDF,by = "id")
+NickMoviesAllData <- merge(NickMovieStats,MoviesDetailsDF,by = "id")
+NickFBAllData <- merge(NickFBStats,FBDetailsDF,by = "id")
