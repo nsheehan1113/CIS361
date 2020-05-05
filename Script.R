@@ -14,20 +14,20 @@ yt_oauth(app_id = client_id,
          token = '')
 
 #Get playlist Id for Music playlist
-NickMusicPlaylistId <- str_split(
-  string = "https://www.youtube.com/playlist?list=PL1SoOwjbBbc9a0YugW2mLfaDkjCQrlNlh", 
+NickFBPlaylistId <- str_split(
+  string = "https://www.youtube.com/playlist?list=PL1SoOwjbBbc-rh4v7ciKTtIcOyOpT11ov", 
   pattern = "=", 
   n = 2,
   simplify = TRUE)[ , 2]
-NickMusicPlaylist
+
 
 #Put videos in playlist into data frame
-NickMusicPlaylist <- get_playlist_items(filter = 
-                                              c(playlist_id = NickMusicPlaylistId), 
+NickFBPlaylist <- get_playlist_items(filter = 
+                                              c(playlist_id = NickFBPlaylistId), 
                                               part = "contentDetails",
                                               max_results = 10)
 #Save list of video ids
-music_ids <- base::as.vector(NickMusicPlaylist$contentDetails.videoId)
+FB_ids <- base::as.vector(NickFBPlaylist$contentDetails.videoId)
 
 #Function for get all stats on vids
 get_all_stats <- function(id) {
@@ -35,12 +35,22 @@ get_all_stats <- function(id) {
 } 
 
 #Get all stats for vid ids in that playlist
-NickMusicStats <- map_df(.x = music_ids, .f = get_all_stats)
+NickFBStats <- map_df(.x = FB_ids, .f = get_all_stats)
 
-#Function for get all details on vids
-get_all_details <- function(id) {
-  get_video_details(video_id = id, part = "snippet")
+#get all details on vids
+NickFBDetails <- lapply(FB_ids, get_video_details)
+NickMusicDetails <- lapply(music_ids, get_video_details)
+NickGamingDetails <- lapply(gaming_ids, get_video_details)
+NickMoviesDetails <- lapply(movies_ids, get_video_details)
+
+#Pull Id and Title from details
+
+FBDetailsDF <- data.frame(Id=NA, Title=NA)
+
+for (p in 1:length(NickFBDetails)) {
+  Id <- NickFBDetails[[p]]$items[[1]]$id
+  Title <- NickFBDetails[[p]]$items[[1]]$snippet$title
+  
+  FBdetail <- data_frame(Id = Id, Title = Title)
+  FBDetailsDF <- rbind(FBdetail, FBDetailsDF)
 }
-
-#Get all details for vid ids in that playlist
-NickMusicDetails <- map_df(.x = "ZengOKCUBHo", .f = get_video_details)
