@@ -70,7 +70,8 @@ NickFBPlaylist <- get_playlist_items(filter =
 FB_ids <- base::as.vector(NickFBPlaylist$contentDetails.videoId)
 ```
 
-
+I then proceeded to collect both the stats and details for all videos within these playlists.  I did this through the Tuber functions get_stats and get_video_details.  I then took those results and put them into appropriate lists and data frames.  All the Data I really needed was in the stats of the videos, except for the video Title.  So that is why I had to get the details for each video too.
+```{r}
 #Function for get all stats on vids
 get_all_stats <- function(id) {
   get_stats(video_id = id)
@@ -84,7 +85,10 @@ NickFBDetails <- lapply(FB_ids, get_video_details)
 NickMusicDetails <- lapply(music_ids, get_video_details)
 NickGamingDetails <- lapply(gaming_ids, get_video_details)
 NickMoviesDetails <- lapply(movies_ids, get_video_details)
+```
 
+Next, I looped through each details list to get the Id and Title for each video.  I placed this into its own data frame as I plan to merge this to the stats data frames later.  I had to loop through each details list for each genre this way.
+```{r}
 #Pull Id and Title from details
 
 FBDetailsDF <- data.frame(id=NA, Title=NA)
@@ -96,14 +100,22 @@ for (p in 1:length(NickFBDetails)) {
   FBdetail <- data_frame(id = id, Title = Title)
   FBDetailsDF <- rbind(FBdetail, FBDetailsDF)
 }
+```
 
+Finally, I merged my Titles with the stats data frames to make a complete data frame for each genre with the data I need.
+```{r}
 #Merge details to stats data frame
 
 NickMusicAllData <- merge(NickMusicStats,MusicDetailsDF,by = "id")
 NickGamingAllData <- merge(NickGamingStats,GamingDetailsDF,by = "id")
 NickMoviesAllData <- merge(NickMovieStats,MoviesDetailsDF,by = "id")
 NickFBAllData <- merge(NickFBStats,FBDetailsDF,by = "id")
+```
 
+## METHODOLOGY
+
+Here is where I start to graph some of my data to get an idea of how it is looking.  I made a simple bar plot representing Total view counts per genre.
+```{r}
 #Graph showing differences in views by main genres
 
 options(scipen=999)
@@ -122,4 +134,4 @@ ggplot(data=BarGraphDF, aes(x=Genres,y=ViewCounts))+
   geom_bar(stat="identity", fill="steelblue")+
   geom_text(aes(label=ViewCounts), vjust=1.6, color="white",size=3.5)+
   theme_minimal()
-
+```
