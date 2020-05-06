@@ -7,6 +7,7 @@ library(dplyr)
 library(shiny)
 library(rmarkdown)
 library(ggplot2)
+library(knitr)
 
 #Authorization for Youtube APIs
 client_id <- "871403720599-cjqncpljsnghb9las2sr0s87rdtm62ko.apps.googleusercontent.com"
