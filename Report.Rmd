@@ -135,3 +135,54 @@ ggplot(data=BarGraphDF, aes(x=Genres,y=ViewCounts))+
   geom_text(aes(label=ViewCounts), vjust=1.6, color="white",size=3.5)+
   theme_minimal()
 ```
+
+Using the same format, I created three more bar graphs to investigate the interactions the videos in each genre recieve.  Interactions are Likes, Dislikes, and comments.  These data points help judge how active a community is.
+```{r}
+#Generate Bar Plot for Likes and Disklikes for each genre
+
+MusicLikeCount <- sum(as.numeric(NickMusicAllData$likeCount), na.rm=TRUE)
+GamingLikeCount <- sum(as.numeric(NickGamingAllData$likeCount), na.rm=TRUE)
+MoviesLikeCount <- sum(as.numeric(NickMoviesAllData$likeCount), na.rm=TRUE)
+FBLikeCount <- sum(as.numeric(NickFBAllData$likeCount), na.rm=TRUE)
+
+LikeCounts <- c(MoviesLikeCount,MusicLikeCount,GamingLikeCount,FBLikeCount)
+
+LikesBarGraphDF <- data.frame(Genres,LikeCounts)
+
+ggplot(data=LikesBarGraphDF, aes(x=Genres,y=LikeCounts))+
+  geom_bar(stat="identity", fill="steelblue")+
+  geom_text(aes(label=LikeCounts), vjust=1.6, color="white",size=3.5)+
+  theme_minimal()
+
+MusicDislikeCount <- sum(as.numeric(NickMusicAllData$dislikeCount), na.rm=TRUE)
+GamingDislikeCount <- sum(as.numeric(NickGamingAllData$dislikeCount), na.rm=TRUE)
+MoviesDislikeCount <- sum(as.numeric(NickMoviesAllData$dislikeCount), na.rm=TRUE)
+FBDislikeCount <- sum(as.numeric(NickFBAllData$dislikeCount), na.rm=TRUE)
+
+DislikeCounts <- c(MoviesDislikeCount,MusicDislikeCount,GamingDislikeCount,FBDislikeCount)
+
+DislikesBarGraphDF <- data.frame(Genres,DislikeCounts)
+
+ggplot(data=DislikesBarGraphDF, aes(x=Genres,y=DislikeCounts))+
+  geom_bar(stat="identity", fill="steelblue")+
+  geom_text(aes(label=DislikeCounts), vjust=1.6, color="white",size=3.5)+
+  theme_minimal()
+
+# Bar graph for comments per genre
+
+MusicCommentCount <- sum(as.numeric(NickMusicAllData$commentCount), na.rm=TRUE)
+GamingCommentCount <- sum(as.numeric(NickGamingAllData$commentCount), na.rm=TRUE)
+MoviesCommentCount <- sum(as.numeric(NickMoviesAllData$commentCount), na.rm=TRUE)
+FBCommentCount <- sum(as.numeric(NickFBAllData$commentCount), na.rm=TRUE)
+
+CommentCounts <- c(MoviesCommentCount,MusicCommentCount,GamingCommentCount,FBCommentCount)
+
+CommentsBarGraphDF <- data.frame(Genres,CommentCounts)
+
+ggplot(data=CommentsBarGraphDF, aes(x=Genres,y=CommentCounts))+
+  geom_bar(stat="identity", fill="steelblue")+
+  geom_text(aes(label=CommentCounts), vjust=1.6, color="white",size=3.5)+
+  theme_minimal()
+```
+
+## 
