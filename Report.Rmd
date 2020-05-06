@@ -112,7 +112,7 @@ NickMoviesAllData <- merge(NickMovieStats,MoviesDetailsDF,by = "id")
 NickFBAllData <- merge(NickFBStats,FBDetailsDF,by = "id")
 ```
 
-## METHODOLOGY
+## METHODOLOGY/RESULTS
 
 Here is where I start to graph some of my data to get an idea of how it is looking.  I made a simple bar plot representing Total view counts per genre.
 ```{r}
@@ -185,4 +185,19 @@ ggplot(data=CommentsBarGraphDF, aes(x=Genres,y=CommentCounts))+
   theme_minimal()
 ```
 
-## 
+## CONCLUSION
+
+The results seem to show that the more views you have, the more interactions you have.  When you you are talking about how much money people are making off videos, you have to take a couple things into account.  The genre, views, and the interactions on the videos.  Interactions are important because the more ineractions you get the more noticable your video is on YouTube.  Music is by far in the lead in all categories but what was suprising to me was how strong gaming is on Youtube.  It is easily second, but produces a larging interaction percentage then even the music genre.  By these numbers, it definately seems like what you get paid will be quite different between genres.  There is not much equality when it comes to pay on YouTube at this point, but hopefully strides toward this will be made soon.  
+
+## Resources
+
+Packages I used:
+
+Tuber: https://cran.r-project.org/web/packages/tuber/index.html
+Purrr: https://cran.r-project.org/web/packages/purrr/index.html
+Stringr: https://cran.r-project.org/web/packages/stringr/index.html
+Shiny: https://cran.r-project.org/web/packages/shiny/index.html
+RMarkdown: https://cran.r-project.org/web/packages/rmarkdown/index.html
+Dplyr: https://cran.r-project.org/web/packages/dplyr/index.html
+ggplot2: https://cran.r-project.org/web/packages/ggplot2/index.html
+knitr: https://cran.r-project.org/web/packages/knitr/index.html
