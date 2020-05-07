@@ -6,7 +6,7 @@ output: word_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE,eval = FALSE)
 ```
 
 ## SUMMARY
@@ -27,9 +27,8 @@ I believe there will be some pretty large differences in the salaries among the 
 ## DATA
 
 First thing I needed to do was enable all the packages i will be using.
-```{r}
+```{r data}
 #Enable Packages
-
 library(tuber)
 library(purrr)
 library(stringr)
@@ -41,26 +40,23 @@ library(knitr)
 ```
 
 Then I needed to source my data.  Since i was using information from YouTube, I needed to be able to hit their API's to collect data.  Luckily, they offer some public API's that you can access after setting up an account with Google Developers Console.  I was able to activate these APIs from my project and get my token using Auth 2.0.  Tuber offers the function yt_oauth that allows me to do this.
-```{r}
+```{r authorization}
 #Authorization for Youtube APIs
 client_id <- "871403720599-cjqncpljsnghb9las2sr0s87rdtm62ko.apps.googleusercontent.com"
 client_secret <-  "UV1qXjK9TmVB9k6MzQLoJsjT"
-
 yt_oauth(app_id = client_id,
          app_secret = client_secret,
          token = '')
 ```
 
 Next, I needed to figure out the best way to collect the data from YouTube to fit my needs. What i decided to do, was to create a playlist for each main genre on YouTube and put the trending videos from each category in it.  Then I was able to use Tuber to pull my playlist, and strip out the video Ids.  I had to re-use this for each genre, and I could not place into a loop because I needed to save to different variables every iteration.
-```{r}
+```{r playlist manipulation}
 #Get playlist Id for Music playlist
 NickFBPlaylistId <- str_split(
   string = "https://www.youtube.com/playlist?list=PL1SoOwjbBbc-rh4v7ciKTtIcOyOpT11ov", 
   pattern = "=", 
   n = 2,
   simplify = TRUE)[ , 2]
-
-
 #Put videos in playlist into data frame
 NickFBPlaylist <- get_playlist_items(filter = 
                                               c(playlist_id = NickFBPlaylistId), 
@@ -71,15 +67,13 @@ FB_ids <- base::as.vector(NickFBPlaylist$contentDetails.videoId)
 ```
 
 I then proceeded to collect both the stats and details for all videos within these playlists.  I did this through the Tuber functions get_stats and get_video_details.  I then took those results and put them into appropriate lists and data frames.  All the Data I really needed was in the stats of the videos, except for the video Title.  So that is why I had to get the details for each video too.
-```{r}
+```{r getting stats and data}
 #Function for get all stats on vids
 get_all_stats <- function(id) {
   get_stats(video_id = id)
 } 
-
 #Get all stats for vid ids in that playlist
 NickFBStats <- map_df(.x = FB_ids, .f = get_all_stats)
-
 #get all details on vids
 NickFBDetails <- lapply(FB_ids, get_video_details)
 NickMusicDetails <- lapply(music_ids, get_video_details)
@@ -88,11 +82,9 @@ NickMoviesDetails <- lapply(movies_ids, get_video_details)
 ```
 
 Next, I looped through each details list to get the Id and Title for each video.  I placed this into its own data frame as I plan to merge this to the stats data frames later.  I had to loop through each details list for each genre this way.
-```{r}
+```{r formatting data}
 #Pull Id and Title from details
-
 FBDetailsDF <- data.frame(id=NA, Title=NA)
-
 for (p in 1:length(NickFBDetails)) {
   id <- NickFBDetails[[p]]$items[[1]]$id
   Title <- NickFBDetails[[p]]$items[[1]]$snippet$title
@@ -103,9 +95,8 @@ for (p in 1:length(NickFBDetails)) {
 ```
 
 Finally, I merged my Titles with the stats data frames to make a complete data frame for each genre with the data I need.
-```{r}
+```{r making comlete data frames}
 #Merge details to stats data frame
-
 NickMusicAllData <- merge(NickMusicStats,MusicDetailsDF,by = "id")
 NickGamingAllData <- merge(NickGamingStats,GamingDetailsDF,by = "id")
 NickMoviesAllData <- merge(NickMovieStats,MoviesDetailsDF,by = "id")
@@ -115,21 +106,16 @@ NickFBAllData <- merge(NickFBStats,FBDetailsDF,by = "id")
 ## METHODOLOGY/RESULTS
 
 Here is where I start to graph some of my data to get an idea of how it is looking.  I made a simple bar plot representing Total view counts per genre.
-```{r}
+```{r methodology}
 #Graph showing differences in views by main genres
-
 options(scipen=999)
-
 MusicGenreViewCount <- sum(as.numeric(NickMusicAllData$viewCount), na.rm = TRUE)
 GamingGenreViewCount <- sum(as.numeric(NickGamingAllData$viewCount), na.rm = TRUE)
 MoviesGenreViewCount <- sum(as.numeric(NickMoviesAllData$viewCount), na.rm = TRUE)
 FBGenreViewCount <- sum(as.numeric(NickFBAllData$viewCount), na.rm = TRUE)
-
 Genres <- c("Movies/Entertainment","Music","Gaming","Fashion/Beauty")
 ViewCounts <- c(MoviesGenreViewCount,MusicGenreViewCount,GamingGenreViewCount,FBGenreViewCount)
-
 BarGraphDF <- data.frame(Genres,ViewCounts)
-
 ggplot(data=BarGraphDF, aes(x=Genres,y=ViewCounts))+
   geom_bar(stat="identity", fill="steelblue")+
   geom_text(aes(label=ViewCounts), vjust=1.6, color="white",size=3.5)+
@@ -137,48 +123,35 @@ ggplot(data=BarGraphDF, aes(x=Genres,y=ViewCounts))+
 ```
 
 Using the same format, I created three more bar graphs to investigate the interactions the videos in each genre recieve.  Interactions are Likes, Dislikes, and comments.  These data points help judge how active a community is.
-```{r}
+```{r graphs}
 #Generate Bar Plot for Likes and Disklikes for each genre
-
 MusicLikeCount <- sum(as.numeric(NickMusicAllData$likeCount), na.rm=TRUE)
 GamingLikeCount <- sum(as.numeric(NickGamingAllData$likeCount), na.rm=TRUE)
 MoviesLikeCount <- sum(as.numeric(NickMoviesAllData$likeCount), na.rm=TRUE)
 FBLikeCount <- sum(as.numeric(NickFBAllData$likeCount), na.rm=TRUE)
-
 LikeCounts <- c(MoviesLikeCount,MusicLikeCount,GamingLikeCount,FBLikeCount)
-
 LikesBarGraphDF <- data.frame(Genres,LikeCounts)
-
 ggplot(data=LikesBarGraphDF, aes(x=Genres,y=LikeCounts))+
   geom_bar(stat="identity", fill="steelblue")+
   geom_text(aes(label=LikeCounts), vjust=1.6, color="white",size=3.5)+
   theme_minimal()
-
 MusicDislikeCount <- sum(as.numeric(NickMusicAllData$dislikeCount), na.rm=TRUE)
 GamingDislikeCount <- sum(as.numeric(NickGamingAllData$dislikeCount), na.rm=TRUE)
 MoviesDislikeCount <- sum(as.numeric(NickMoviesAllData$dislikeCount), na.rm=TRUE)
 FBDislikeCount <- sum(as.numeric(NickFBAllData$dislikeCount), na.rm=TRUE)
-
 DislikeCounts <- c(MoviesDislikeCount,MusicDislikeCount,GamingDislikeCount,FBDislikeCount)
-
 DislikesBarGraphDF <- data.frame(Genres,DislikeCounts)
-
 ggplot(data=DislikesBarGraphDF, aes(x=Genres,y=DislikeCounts))+
   geom_bar(stat="identity", fill="steelblue")+
   geom_text(aes(label=DislikeCounts), vjust=1.6, color="white",size=3.5)+
   theme_minimal()
-
 # Bar graph for comments per genre
-
 MusicCommentCount <- sum(as.numeric(NickMusicAllData$commentCount), na.rm=TRUE)
 GamingCommentCount <- sum(as.numeric(NickGamingAllData$commentCount), na.rm=TRUE)
 MoviesCommentCount <- sum(as.numeric(NickMoviesAllData$commentCount), na.rm=TRUE)
 FBCommentCount <- sum(as.numeric(NickFBAllData$commentCount), na.rm=TRUE)
-
 CommentCounts <- c(MoviesCommentCount,MusicCommentCount,GamingCommentCount,FBCommentCount)
-
 CommentsBarGraphDF <- data.frame(Genres,CommentCounts)
-
 ggplot(data=CommentsBarGraphDF, aes(x=Genres,y=CommentCounts))+
   geom_bar(stat="identity", fill="steelblue")+
   geom_text(aes(label=CommentCounts), vjust=1.6, color="white",size=3.5)+
@@ -193,11 +166,11 @@ The results seem to show that the more views you have, the more interactions you
 
 Packages I used:
 
-Tuber: https://cran.r-project.org/web/packages/tuber/index.html
-Purrr: https://cran.r-project.org/web/packages/purrr/index.html
-Stringr: https://cran.r-project.org/web/packages/stringr/index.html
-Shiny: https://cran.r-project.org/web/packages/shiny/index.html
-RMarkdown: https://cran.r-project.org/web/packages/rmarkdown/index.html
-Dplyr: https://cran.r-project.org/web/packages/dplyr/index.html
-ggplot2: https://cran.r-project.org/web/packages/ggplot2/index.html
-knitr: https://cran.r-project.org/web/packages/knitr/index.html
+Tuber: https://cran.r-project.org/web/packages/tuber/index.html \
+Purrr: https://cran.r-project.org/web/packages/purrr/index.html \
+Stringr: https://cran.r-project.org/web/packages/stringr/index.html \
+Shiny: https://cran.r-project.org/web/packages/shiny/index.html \
+RMarkdown: https://cran.r-project.org/web/packages/rmarkdown/index.html \
+Dplyr: https://cran.r-project.org/web/packages/dplyr/index.html \
+ggplot2: https://cran.r-project.org/web/packages/ggplot2/index.html \
+knitr: https://cran.r-project.org/web/packages/knitr/index.html \
